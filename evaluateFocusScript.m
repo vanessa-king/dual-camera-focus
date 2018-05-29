@@ -1,26 +1,41 @@
-%This is to call the evaluateFocus function.
-%This script should be called by the Focus.ijm
+%This is to call the restoreRed and evaluateFocus functions as well as 
+%Focus.ijm and Split.ijm.
 
+%Here we open the open, and get its the name and path.
+[file,path] = uigetfile('*.tif');
+originalImage = imread(fullfile(path, file));
+%Before we run any functions, we need to first split this image into the
+%green and red sides. This is done in ImageJ because ImageJ retains the
+%photo brightness, which is needed later.
+
+
+%Add path needs to be where the Fiji app is on the computer.
+%Example: 'C:\Users\2ColorTIRF\Downloads\fiji-win64\Fiji.app\scripts'
+addpath '/Applications/Fiji.app/scripts'
 %opens ImageJ
-%For a mac computer, this needs to be: '/Applications/Fiji.app/scripts'
-%For a windows computer, this needs to be: 'C:\Users\2ColorTIRF\Downloads\fiji-win64\Fiji.app\scripts'
-addpath 'C:\Users\2ColorTIRF\Downloads\fiji-win64\Fiji.app\scripts'
 ImageJ;
 currentDirectory = pwd;
+%open our original image.
+impG = ij.IJ.openImage(fullfile(path,file));
+impG.show();
+%Imports then runs the imagej macro 
+ij.IJ.run("Install...", "install="+currentDirectory+"/Split.ijm");
+ij.IJ.run("Split");
 
-%Imports then runs the imagej macro
+%Now we align the red image. This is done using the restoreRed function.
+restoreRed(path);
+
+%Next we want to find ROIs and intensities using the green image and the
+%restored red image.
+impG = ij.IJ.openImage(strcat(path,'restored.png'));
+impG.show();
+%Imports then runs the imagej macro to detect ROIs and intensities.
 ij.IJ.run("Install...", "install="+currentDirectory+"/Focus.ijm");
 ij.IJ.run("Focus");
 
-%Asks the user what image we are running the code on. This should be
-%improved
-prompt = {'Where is the image?(Desktop folder)'};
-answer = inputdlg(prompt);
-strAnswer = string(answer);
-
-%runs the matlab function on the image.
-%Note: for windows, the slashes need to be \, for mac, slashes need to be /
-evaluateFocus(currentDirectory+"\"+strAnswer+"\");
+%Now we evaluate the tilt of the focuses.
+evaluateFocus(path);
+%and we're done!
 
 function y = evaluateFocus(filePath)
 %MATLAB script to follow Focus.ijm
@@ -183,5 +198,50 @@ title('Green:Red Intensity Ratio.');
 hold off
 rotate3d on;
 
+end
+
+function y = restoreRed(filePath)
+
+%This function uses the estimateGeometricTransform function to align the
+%red image with the green image. It then saves the restored image. 
+
+%read the images
+gImage = imread(strcat(filePath,'Left.png'));
+rImage = imread(strcat(filePath,'Right.png'));
+
+%detect features
+%Lower the 'MetricThreshold' variable to detect more features.
+%Leave NumOctaves at 1. This determines the size of the features found, and
+%it is already at its minimum.
+gPoints = detectSURFFeatures(gImage,'MetricThreshold',10.0,'NumOctaves',1);
+rPoints = detectSURFFeatures(rImage,'MetricThreshold',5.0,'NumOctaves',1);
+
+%extract the features
+[fg,vptsG] = extractFeatures(gImage,gPoints);
+[fr,vptsR] = extractFeatures(rImage,rPoints);
+
+%retrieve the location of matched points
+indexPairs = matchFeatures(fg,fr) ;
+matchedPointsG = vptsG(indexPairs(:,1));
+matchedPointsR = vptsR(indexPairs(:,2));
+
+%Delete outlier points
+[tform,inlierPtsDistorted,inlierPtsOriginal] = ...
+    estimateGeometricTransform(matchedPointsR,matchedPointsG,...
+    'affine');
+figure; 
+
+showMatchedFeatures(gImage,rImage,...
+    inlierPtsOriginal,inlierPtsDistorted);
+title('Matched inlier points');
+
+%Show the red image as it should be "aligned". Set to display as size of
+%green image.
+outputView = imref2d(size(gImage));
+restoredRed = imwarp(rImage,tform,'OutputView',outputView);
+
+%Now we have the "restored" image of the red channel that we want to pass
+%to ImageJ to find ROIs. In order to do this, we need to save the image.
+imwrite(restoredRed,strcat(filePath,'restored.png'));
 
 end

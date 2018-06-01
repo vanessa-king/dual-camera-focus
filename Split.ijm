@@ -12,20 +12,22 @@ Split = Dialog.getNumber();
 
 //Now we are going to split the image into two separate windows. 
 //Rectangle function is of form (x1,y1,width,height)
-//This one is for the right hand side
-makeRectangle(Split, 0, getWidth-Split, getHeight);
-run("Duplicate...", "title=Right");
-selectWindow("Right");
-saveAs("PNG", originalDirectory+"Right.png");
-close();
-
-//Now for the left hand side
+//First the left hand side
 selectImage(originalImage);
 makeRectangle(0, 0, Split, getHeight);
 run("Duplicate...", "title=Left");
 selectWindow("Left");
 saveAs("PNG", originalDirectory+"Left.png");
 close();
+
+
+//Now for the right hand side
+makeRectangle(Split, 0, getWidth-Split, getHeight);
+run("Duplicate...", "title=Right");
+selectWindow("Right");
+saveAs("PNG", originalDirectory+"Right.png");
+close();
+
 
 
 selectImage(originalImage);

@@ -1,53 +1,20 @@
-function y = evaluateFocus(filePath)
+function y = evaluateFocus(leftX,leftY,leftI,rightX,rightY,rightI)
 %MATLAB script to follow Focus.ijm
 %Purpose is to:
-% 1. open the csv files outputted by Focus.ijm and put into matrix
-% 2. correlate the points between channels
-% 3. compute intensity ratio and output a graph.
+% 1. correlate the points between channels
+% 2. compute intensity ratio and output a graph.
+
+leftPosX = leftX;
+leftPosY = leftY;
+
+rightPosX = rightX;
+rightPosY = rightY;
+ 
+leftInt = leftI;
+rightInt = rightI;
+
 
 %Step 1
-
-%open positions csv
-%read only the section of the csv thats needed
-
-strFilePath = string(filePath);
-
-%Left ROI positions
-fileID = fopen(strFilePath+'LeftROIpositions.csv', 'r' ); 
-leftPosMatrix = textscan( fileID, '%s %s %s %f %f %*[^\n]', 'Delimiter',',','Headerlines',1);
-%Here we load x,y data into two arrays.
-leftPosX = leftPosMatrix{4};
-leftPosY = leftPosMatrix{5};
-fclose( fileID ); 
-
-%Right ROI positions
-fileID = fopen( strFilePath+'RightROIpositions.csv', 'r' ); 
-rightPosMatrix = textscan( fileID, '%s %s %s %f %f %*[^\n]', 'Delimiter',',','Headerlines',1);
-%Here we load x,y data into two arrays.
-rightPosX = rightPosMatrix{4};
-rightPosY = rightPosMatrix{5};
-fclose( fileID ); 
-
-
-%open intensities csv
-%read only the section of the csv thats needed
-
-%Left Intensities
-fileID = fopen( strFilePath+'LeftIntensities.csv', 'r' ); 
-leftIntensitiesMatrix = textscan( fileID, '%s %s %f %*[^\n]', 'Delimiter',',','Headerlines',1);
-%Here we load the data into an arrays.
-leftInt = leftIntensitiesMatrix{3};
-fclose( fileID ); 
-
-%Right Intensities
-fileID = fopen( strFilePath+'RightIntensities.csv', 'r' ); 
-rightIntensitiesMatrix = textscan( fileID, '%s %s %f %*[^\n]', 'Delimiter',',','Headerlines',1);
-%Here we load the data into an arrays.
-rightInt = rightIntensitiesMatrix{3};
-fclose( fileID ); 
-
-
-%Step 2
 
 %Now we want to find the Right point closest to each Left point.
 %It is assumed that there are more points in left than right. First let's
@@ -84,7 +51,7 @@ end
 %We now have our point correlations described by the correlation matrix
 
 
-%Step 3
+%Step 2
 
 %Using the correlations, we want to compute ratio of intensities between
 %correlating points. 

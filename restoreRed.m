@@ -1,4 +1,4 @@
-function y = restoreRed(filePath)
+function y = restoreRed(filePath,gThreshold,rThreshold)
 
 %This function uses the estimateGeometricTransform function to align the
 %red image with the green image. It then saves the restored image. 
@@ -11,8 +11,8 @@ rImage = imread(strcat(filePath,'Right.png'));
 %Lower the 'MetricThreshold' variable to detect more features.
 %Leave NumOctaves at 1. This determines the size of the features found, and
 %it is already at its minimum.
-gPoints = detectSURFFeatures(gImage,'MetricThreshold',10.0,'NumOctaves',1);
-rPoints = detectSURFFeatures(rImage,'MetricThreshold',5.0,'NumOctaves',1);
+gPoints = detectSURFFeatures(gImage,'MetricThreshold',gThreshold,'NumOctaves',1);
+rPoints = detectSURFFeatures(rImage,'MetricThreshold',rThreshold,'NumOctaves',1);
 
 %extract the features
 [fg,vptsG] = extractFeatures(gImage,gPoints);
@@ -32,6 +32,23 @@ figure;
 showMatchedFeatures(gImage,rImage,...
     inlierPtsOriginal,inlierPtsDistorted);
 title('Matched inlier points');
+
+%Now we want to display the translation and rotation information
+instructions = '\fontsize{15}Shift red frame by:';
+xForm = {'X pixels:',num2str(tform.T(3,1))};
+xstr = strjoin(xForm,' ');
+yForm = {'Y pixels:',num2str(tform.T(3,2))};
+ystr = strjoin(yForm,' ');
+rotForm = {'Angle (deg):',num2str(rad2deg(asin(tform.T(1,2))))};
+rotstr = strjoin(rotForm,' ');
+
+messages = {instructions, xstr, ystr, rotstr};
+message = strjoin(messages,'\n');
+
+CreateStruct.WindowStyle = 'non-modal';
+CreateStruct.Interpreter = 'tex';
+info = msgbox(message,CreateStruct);
+
 
 %Show the red image as it should be "aligned". Set to display as size of
 %green image.

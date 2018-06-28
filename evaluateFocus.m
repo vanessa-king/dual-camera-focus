@@ -1,48 +1,38 @@
-function y = evaluateFocus(leftX,leftY,leftI,rightX,rightY,rightI)
+function y = evaluateFocus(greenX,greenY,greenI,redX,redY,redI)
 %MATLAB script to follow Focus.ijm
 %Purpose is to:
 % 1. correlate the points between channels
 % 2. compute intensity ratio and output a graph.
 
-leftPosX = leftX;
-leftPosY = leftY;
-
-rightPosX = rightX;
-rightPosY = rightY;
- 
-leftInt = leftI;
-rightInt = rightI;
-
-
 %Step 1
 
-%Now we want to find the Right point closest to each Left point.
-%It is assumed that there are more points in left than right. First let's
+%Now we want to find the red point closest to each green point.
+%It is assumed that there are more points in green than red. First let's
 %check this assumption:
-if length(leftPosX)<length(rightPosX)
-    disp("The threshold on the right image is too low! Right image has more points than left.");
+if length(greenX)<length(redX)
+    disp("The threshold on the red image is too low! Red image has more points than green.");
 end
 
 distance = 0.0;
 best = 100.0;
 bestIndex = 0;
-correlation = zeros(1,length(rightPosX));
+correlation = zeros(1,length(redX));
 
-%for every point in Right...
-for i = 1:length(rightPosX)
-    %compare to every point in Left...
-    for j = 1:length(leftPosX)
+%for every point in red...
+for i = 1:length(redX)
+    %compare to every point in green...
+    for j = 1:length(greenX)
         %compute the distance between the points...
-        distance = sqrt((leftPosX(j)-rightPosX(i))^2+(leftPosY(j)-rightPosY(i))^2);
+        distance = sqrt((greenX(j)-redX(i))^2+(greenY(j)-redY(i))^2);
         %if this is the shortest distance found so far, save it...
         if distance < best
             best = distance;
             bestIndex = j;
         end
     end
-    %at this point, we have found the closest right point.
-    %the closest point is the "best index"th right point.
-    %want to save this information for the ith left point
+    %at this point, we have found the closest red point.
+    %the closest point is the "best index"th red point.
+    %want to save this information for the ith green point
     correlation(i) = bestIndex;
     
     %reset our reference variable.
@@ -62,9 +52,9 @@ j=0;
 %for all correlating points...
 for i=1:length(correlation)
     %Consider correlation(i)=j, 
-    %then the ith point in Right correlates to the jth point in Left.
+    %then the ith point in red correlates to the jth point in green.
     j = correlation(i);
-    ratio(i) = leftInt(j)/rightInt(i);
+    ratio(i) = greenI(j)/redI(i);
 end
 
 %Now that we've computed all the ratios, we need to display them.
@@ -73,14 +63,14 @@ end
 h = figure;
             
 %Plot the 3d scatter plot of ratio over position
-plot3(rightPosX,rightPosY, ratio, '.r',...
+plot3(redX,redY, ratio, '.r',...
 'MarkerSize',10);   
 hold on
                
 %Create horizontal plane as reference.
 %First find min and max for plane to sit
-meshMin = [min(rightPosX),min(rightPosY)];
-meshMax = [max(rightPosX),max(rightPosY)];
+meshMin = [min(redX),min(redY)];
+meshMax = [max(redX),max(redY)];
 %make 2d grid. Note that unfortunately it has to be square
 [X,Y] = meshgrid(min(meshMin):50:max(meshMax));
 %set Z value to constant at average ratio value
@@ -92,14 +82,14 @@ hold on
 %Create x and y lines of best fit for visual guidance.
 
 %Compute average x and y values
-avgX = sum(rightPosX)/length(rightPosX);
-avgXMat = zeros(1,length(rightPosX));
+avgX = sum(redX)/length(redX);
+avgXMat = zeros(1,length(redX));
 for i=1:length(avgXMat)
     avgXMat(i)=avgX;
 end
 
-avgY = sum(rightPosY)/length(rightPosY);
-avgYMat = zeros(length(rightPosY),1);
+avgY = sum(redY)/length(redY);
+avgYMat = zeros(length(redY),1);
 for i=1:length(avgYMat)
     avgYMat(i)=avgY;
 end
@@ -108,17 +98,17 @@ end
 ratio = ratio';
 
 %First: linear regression for x,z.
-fitXZ = polyfit(rightPosX,ratio,1);
-fitXValues = polyval(fitXZ,rightPosX);
-plot3(rightPosX, avgYMat, fitXValues,'-k',...
+fitXZ = polyfit(redX,ratio,1);
+fitXValues = polyval(fitXZ,redX);
+plot3(redX, avgYMat, fitXValues,'-k',...
     'LineWidth',5);   
 hold on
 
 
 %Second: linear regression for y,z.
-fitYZ = polyfit(rightPosY,ratio,1);
-fitYValues = polyval(fitYZ,rightPosY);
-plot3(avgXMat, rightPosY, fitYValues,'-k',...
+fitYZ = polyfit(redY,ratio,1);
+fitYValues = polyval(fitYZ,redY);
+plot3(avgXMat, redY, fitYValues,'-k',...
     'LineWidth',5);
 
 legend('Ratio','Green channel (ref)','Red channel tilt','Location','northeast');

@@ -22,7 +22,7 @@ function varargout = Focus(varargin)
 
 % Edit the above text to modify the response to help Focus
 
-% Last Modified by GUIDE v2.5 04-Jun-2018 12:44:03
+% Last Modified by GUIDE v2.5 18-Jun-2018 11:38:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -258,9 +258,21 @@ backgroundRadius = str2double(get(handles.edit5,'String'));
 clearance = str2double(get(handles.edit6,'String'));
 contents = cellstr(get(handles.popupmenu1,'String'));
 refSide = contents{get(handles.popupmenu1,'Value')};
+division = str2double(get(handles.edit8,'String'));
+name = get(handles.edit9,'String');
+
+%Take the picture, and put in a datastore type variable
+image = gui.live().snap(true).get(0);
+store = gui.data().createRAMDatastore();
+store.putImage(image);
+
+%Save the image.
+mode = Datastore.SaveMode.MULTIPAGE_TIFF;
+savePath = 'C:\Users\2ColorTIRF\Desktop\';
+store.save(mode,savePath);
 
 % Run the estimateFocusScript scripts
-evaluateFocusScript(gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
+evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -271,3 +283,88 @@ function pushbutton4_CreateFcn(hObject, eventdata, handles)
 
 function listbox1_CreateFcn(hObject, eventdata, handles)
 %Making this to avoid errors.
+
+
+
+function edit8_Callback(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit8 as text
+%        str2double(get(hObject,'String')) returns contents of edit8 as a double
+division = str2double(get(hObject,'String'));
+
+
+% --- Executes during object creation, after setting all properties.
+function edit8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit9_Callback(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit9 as text
+%        str2double(get(hObject,'String')) returns contents of edit9 as a double
+name = get(hObject,'String');
+
+
+% --- Executes during object creation, after setting all properties.
+function edit9_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in togglebutton3.
+function togglebutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton3
+
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%Set up a link between micromanager and matlab
+
+MMsetup_javaclasspath('C:\Program Files\Micro-Manager-2.0beta')
+addpath(genpath( 'C:\Program Files\Micro-Manager-2.0beta\'));
+
+import mmcorej.*
+import org.micromanager.data.Datastore;
+import org.micromanager.display.DisplayManager;
+import org.micromanager.display.DisplayWindow;
+import org.micromanager.data.Coords;
+import org.micromanager.data.Image;
+import java.util.List;
+import org.micromanager.SnapLiveManager;
+
+%Get the datastore of current open window
+gui = StartMMStudio('C:\Program Files\Micro-Manager-2.0beta\');
+mmc = gui.getCore;
+
+%mmc.loadDevice("Camera", "PVCAM", "YG 14012016 Cascade II 512");
+%core.initializeDevice("Camera");
+acq = gui.getAcquisitionEngine;

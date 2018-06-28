@@ -64,6 +64,6 @@ for i = 1:npos
     
     [ I(:,i), B(:,i), C(i,:) ] = gtr_rafa( imagestack, emi, bgi );
     
-    disp(['Done with molec ' num2str(i)])
+    %disp(['Done with molec ' num2str(i)]) removed by Vanessa
     
 end

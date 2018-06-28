@@ -4,8 +4,8 @@ function y = restoreRed(filePath,gThreshold,rThreshold)
 %red image with the green image. It then saves the restored image. 
 
 %read the images
-gImage = imread(strcat(filePath,'Left.png'));
-rImage = imread(strcat(filePath,'Right.png'));
+gImage = imread(strcat(filePath,'Green.png'));
+rImage = imread(strcat(filePath,'Red.png'));
 
 %detect features
 %Lower the 'MetricThreshold' variable to detect more features.
@@ -57,6 +57,6 @@ restoredRed = imwarp(rImage,tform,'OutputView',outputView);
 
 %Now we have the "restored" image of the red channel that we want to pass
 %to ImageJ to find ROIs. In order to do this, we need to save the image.
-imwrite(restoredRed,strcat(filePath,'restored.png'));
+imwrite(restoredRed,strcat(filePath,'Restored.png'));
 
 end

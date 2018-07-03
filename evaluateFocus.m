@@ -10,7 +10,7 @@ function y = evaluateFocus(greenX,greenY,greenI,redX,redY,redI)
 %It is assumed that there are more points in green than red. First let's
 %check this assumption:
 if length(greenX)<length(redX)
-    disp("The threshold on the red image is too low! Red image has more points than green.");
+    disp("Warning. Because of current threshold values, the red image has more points than the green image.");
 end
 
 distance = 0.0;

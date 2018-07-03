@@ -1,3 +1,4 @@
+
 function varargout = Focus(varargin)
 % FOCUS MATLAB code for Focus.fig
 %      FOCUS, by itself, creates a new FOCUS or raises the existing
@@ -22,7 +23,7 @@ function varargout = Focus(varargin)
 
 % Edit the above text to modify the response to help Focus
 
-% Last Modified by GUIDE v2.5 18-Jun-2018 11:38:13
+% Last Modified by GUIDE v2.5 29-Jun-2018 16:14:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,6 +53,38 @@ function Focus_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to Focus (see VARARGIN)
 
+%Make a folder for iterations to go into
+prompt = 'Please enter data name: ';
+definput = {'Trial'};
+dims = [2,20];
+title = '';
+global folder;
+folder = char(inputdlg(prompt,title,dims,definput));
+cd 'C:\Users\2ColorTIRF\Desktop';
+mkdir(folder);
+cd 'C:\Users\2ColorTIRF\Desktop\focusScripts';
+
+
+global gui;
+global iteration;
+iteration = 1;
+
+MMsetup_javaclasspath('C:\Program Files\Micro-Manager-2.0beta')
+addpath(genpath( 'C:\Program Files\Micro-Manager-2.0beta\'));
+
+import mmcorej.*
+import org.micromanager.data.Datastore;
+import org.micromanager.data.Image;
+import java.util.List;
+import org.micromanager.SnapLiveManager;
+
+
+%Get the datastore of current open window
+gui = StartMMStudio('C:\Program Files\Micro-Manager-2.0beta\');
+mmc = gui.getCore;
+
+acq = gui.getAcquisitionEngine;
+
 % Choose default command line output for Focus
 handles.output = hObject;
 
@@ -59,7 +92,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes Focus wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+ uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -70,7 +103,7 @@ function varargout = Focus_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+%varargout{1} = handles.output;
 
 
 % --- Executes on button press in pushbutton1.
@@ -196,7 +229,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function edit5_Callback(hObject, eventdata, handles)
 % hObject    handle to edit5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -205,7 +237,6 @@ function edit5_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit5 as text
 %        str2double(get(hObject,'String')) returns contents of edit5 as a double
 backgroundRadius = str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function edit5_CreateFcn(hObject, eventdata, handles)
@@ -219,7 +250,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function edit6_Callback(hObject, eventdata, handles)
 % hObject    handle to edit6 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -228,7 +258,6 @@ function edit6_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit6 as text
 %        str2double(get(hObject,'String')) returns contents of edit6 as a double
 clearance = str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function edit6_CreateFcn(hObject, eventdata, handles)
@@ -242,49 +271,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-%Ask for all the current parameter settings.
-gThreshold = str2double(get(handles.edit1,'String'));
-rThreshold = str2double(get(handles.edit2,'String'));
-emissionRadius = str2double(get(handles.edit3,'String'));
-exclusionRadius = str2double(get(handles.edit4,'String'));
-backgroundRadius = str2double(get(handles.edit5,'String'));
-clearance = str2double(get(handles.edit6,'String'));
-contents = cellstr(get(handles.popupmenu1,'String'));
-refSide = contents{get(handles.popupmenu1,'Value')};
-division = str2double(get(handles.edit8,'String'));
-name = get(handles.edit9,'String');
-
-%Take the picture, and put in a datastore type variable
-image = gui.live().snap(true).get(0);
-store = gui.data().createRAMDatastore();
-store.putImage(image);
-
-%Save the image.
-mode = Datastore.SaveMode.MULTIPAGE_TIFF;
-savePath = 'C:\Users\2ColorTIRF\Desktop\';
-store.save(mode,savePath);
-
-% Run the estimateFocusScript scripts
-evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
-
-
-% --- Executes during object creation, after setting all properties.
-function pushbutton4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 function listbox1_CreateFcn(hObject, eventdata, handles)
 %Making this to avoid errors.
-
-
 
 function edit8_Callback(hObject, eventdata, handles)
 % hObject    handle to edit8 (see GCBO)
@@ -294,7 +282,6 @@ function edit8_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit8 as text
 %        str2double(get(hObject,'String')) returns contents of edit8 as a double
 division = str2double(get(hObject,'String'));
-
 
 % --- Executes during object creation, after setting all properties.
 function edit8_CreateFcn(hObject, eventdata, handles)
@@ -308,8 +295,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function edit9_Callback(hObject, eventdata, handles)
 % hObject    handle to edit9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -318,7 +303,6 @@ function edit9_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit9 as text
 %        str2double(get(hObject,'String')) returns contents of edit9 as a double
 name = get(hObject,'String');
-
 
 % --- Executes during object creation, after setting all properties.
 function edit9_CreateFcn(hObject, eventdata, handles)
@@ -332,13 +316,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in togglebutton3.
 function togglebutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to togglebutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hint: get(hObject,'Value') returns toggle state of togglebutton3
 
 
@@ -349,22 +331,59 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %Set up a link between micromanager and matlab
 
+
+% --- Executes on button press in togglebutton4.
+function togglebutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton4
+%The state of the button. If 1, then run the script
+
+
+
+
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Ask for all the current parameter settings.
+gThreshold = str2double(get(handles.edit1,'String'));
+rThreshold = str2double(get(handles.edit2,'String'));
+emissionRadius = str2double(get(handles.edit3,'String'));
+exclusionRadius = str2double(get(handles.edit4,'String'));
+backgroundRadius = str2double(get(handles.edit5,'String'));
+clearance = str2double(get(handles.edit6,'String'));
+contents = cellstr(get(handles.popupmenu1,'String'));
+refSide = contents{get(handles.popupmenu1,'Value')};
+division = str2double(get(handles.edit8,'String'));
+%Want the name to display the iteration
+global iteration;
+global folder;
+name = char(strcat(folder,'_',string(iteration)));
+
 MMsetup_javaclasspath('C:\Program Files\Micro-Manager-2.0beta')
 addpath(genpath( 'C:\Program Files\Micro-Manager-2.0beta\'));
 
 import mmcorej.*
 import org.micromanager.data.Datastore;
-import org.micromanager.display.DisplayManager;
-import org.micromanager.display.DisplayWindow;
-import org.micromanager.data.Coords;
 import org.micromanager.data.Image;
 import java.util.List;
 import org.micromanager.SnapLiveManager;
 
-%Get the datastore of current open window
-gui = StartMMStudio('C:\Program Files\Micro-Manager-2.0beta\');
-mmc = gui.getCore;
+global gui; 
+%Take the picture, and put in a datastore type variable
+image = gui.live().snap(true).get(0);
+store = gui.data().createRAMDatastore();
+store.putImage(image)
 
-%mmc.loadDevice("Camera", "PVCAM", "YG 14012016 Cascade II 512");
-%core.initializeDevice("Camera");
-acq = gui.getAcquisitionEngine;
+%Save the image
+mode = javaMethod('valueOf', 'org.micromanager.data.Datastore$SaveMode', 'SINGLEPLANE_TIFF_SERIES');
+savePath = strcat('C:\Users\2ColorTIRF\Desktop\',folder,'\',name);
+store.save(mode,savePath);
+% Run the estimateFocusScript scripts
+evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
+iteration = iteration+1;

@@ -1,7 +1,6 @@
 function y = splitImage(originalImage, path, division, refSide)
-%This function will replace Split.ijm. Its job is to take the photo and 
-%crop it into two based on the division. Then, it has to save the sides
-%according to the reference side
+%This function takes the photo and crops it into two based on the division.
+%Then, it has to save the sides according to the reference side.
 
 %Get size of original image
 [xmax, ymax, zmax] = size(originalImage);
@@ -12,7 +11,6 @@ left = imcrop(originalImage,[1,1,division,ymax]);
 %Right side
 rightWidth = xmax-division;
 right = imcrop(originalImage,[division,1,rightWidth,ymax]);
-
 
 greenFileName = fullfile(path, 'Green.png');
 redFileName = fullfile(path, 'Red.png');

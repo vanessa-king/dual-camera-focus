@@ -2,32 +2,20 @@ function y = evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRad
 
 %This is to call the restoreRed and evaluateFocus functions as well as
 %Focus.ijm and Split.ijm
-
 import focusScripts.*;
 
-%To be developed later, this is the desired name of the data folder.
-disp("Working on "+name);
+%Here we open the file that we saved from MM.
+firstPath = strcat(name,'\');
+path = strcat('C:\Users\2ColorTIRF\Desktop\',firstPath);
+file = 'img_channel000_position000_time000000000_z000.tif';
 
-%Here we open the file, and get its the name and path.
-[file,path] = uigetfile('*.tif');
-originalImage = imread(fullfile(path, file));
-disp("Step 1/6: Image opened");
+originalImage = imread(fullfile(path,file),'tif');
+disp("Step 1/6: Code started");
 
 %Before we run any functions, we need to first split this image into the
-%green and red sides. This is done in ImageJ because ImageJ retains the
-%photo brightness, which is needed later.
-%Add path needs to be where the Fiji app is on the computer.
-%Example: 'C:\Users\2ColorTIRF\Downloads\fiji-win64\Fiji.app\scripts'
-addpath '/Applications/Fiji.app/scripts'
-%open ImageJ
-ImageJ;
+%green and red sides. 
+splitImage(originalImage, path, division, refSide);
 currentDirectory = pwd;
-%open our original image in an imagej window.
-image = ij.IJ.openImage(fullfile(path,file));
-image.show();
-%Imports then runs the imagej macro 
-ij.IJ.run("Install...", "install="+currentDirectory+"/Split.ijm");
-ij.IJ.run("Split", "division="+division+" green="+refSide);
 disp("Step 2/6: Channels split");
 
 %Now we align the red image. This is done using the restoreRed function

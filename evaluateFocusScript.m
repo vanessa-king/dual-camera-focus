@@ -1,12 +1,13 @@
-function y = evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide)
+function y = evaluateFocusScript(folder, name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide)
 
 %This is to call the restoreRed and evaluateFocus functions as well as
 %Focus.ijm and Split.ijm
 import focusScripts.*;
 
 %Here we open the file that we saved from MM.
+trial_folder = strcat(folder,'\');
 firstPath = strcat(name,'\');
-path = strcat('C:\Users\2ColorTIRF\Desktop\',firstPath);
+path = strcat('C:\Users\2ColorTIRF\Desktop\',trial_folder,firstPath);
 file = 'img_channel000_position000_time000000000_z000.tif';
 
 originalImage = imread(fullfile(path,file),'tif');

@@ -385,5 +385,5 @@ mode = javaMethod('valueOf', 'org.micromanager.data.Datastore$SaveMode', 'SINGLE
 savePath = strcat('C:\Users\2ColorTIRF\Desktop\',folder,'\',name);
 store.save(mode,savePath);
 % Run the estimateFocusScript scripts
-evaluateFocusScript(name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
+evaluateFocusScript(folder,name,division,gThreshold,rThreshold,emissionRadius,exclusionRadius,backgroundRadius,clearance,refSide);
 iteration = iteration+1;
